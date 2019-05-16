@@ -20,6 +20,7 @@ package grpc
 
 import (
 	"fmt"
+	"runtime/debug"
 	"sync"
 
 	"google.golang.org/grpc/balancer"
@@ -96,6 +97,7 @@ type ccBalancerWrapper struct {
 }
 
 func newCCBalancerWrapper(cc *ClientConn, b balancer.Builder, bopts balancer.BuildOptions) *ccBalancerWrapper {
+	fmt.Println("调用new balancer", string(debug.Stack()))
 	ccb := &ccBalancerWrapper{
 		cc:               cc,
 		stateChangeQueue: newSCStateUpdateBuffer(),

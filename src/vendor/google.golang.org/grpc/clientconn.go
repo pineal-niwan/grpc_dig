@@ -25,6 +25,7 @@ import (
 	"math"
 	"net"
 	"reflect"
+	"runtime/debug"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -697,6 +698,7 @@ func (ac *addrConn) connect() error {
 	ac.mu.Unlock()
 
 	// Start a goroutine connecting to the server asynchronously.
+	fmt.Println("调用resetTransport的go routine:", string(debug.Stack()))
 	go ac.resetTransport()
 	return nil
 }
