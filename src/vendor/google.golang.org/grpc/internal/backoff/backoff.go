@@ -23,7 +23,7 @@
 package backoff
 
 import (
-	"fmt"
+	"github.com/sirupsen/logrus"
 	"runtime/debug"
 	"time"
 
@@ -59,7 +59,7 @@ type Exponential struct {
 // Backoff returns the amount of time to wait before the next retry given the
 // number of retries.
 func (bc Exponential) Backoff(retries int) time.Duration {
-	fmt.Println("调用Backoff", string(debug.Stack()))
+	logrus.Info("调用Backoff", string(debug.Stack()))
 	if retries == 0 {
 		return baseDelay
 	}

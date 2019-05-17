@@ -20,6 +20,7 @@ package grpc
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"runtime/debug"
 	"sync"
 
@@ -97,7 +98,7 @@ type ccBalancerWrapper struct {
 }
 
 func newCCBalancerWrapper(cc *ClientConn, b balancer.Builder, bopts balancer.BuildOptions) *ccBalancerWrapper {
-	fmt.Println("调用new balancer", string(debug.Stack()))
+	logrus.Info("调用new balancer", string(debug.Stack()))
 	ccb := &ccBalancerWrapper{
 		cc:               cc,
 		stateChangeQueue: newSCStateUpdateBuffer(),

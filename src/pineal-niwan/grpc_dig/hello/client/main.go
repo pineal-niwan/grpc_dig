@@ -6,7 +6,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/status"
 	"os"
 	"pineal-niwan/grpc_dig/hello/pb"
 	"time"
@@ -19,28 +18,35 @@ func main() {
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "url",
-				Usage: "rpc url",
+				Usage: "服务器url",
 			},
 			&cli.IntFlag{
-				Name: "count",
+				Name:  "count",
+				Usage: "调用次数",
 			},
 			&cli.BoolFlag{
-				Name: "async",
+				Name:  "async",
+				Usage: "是否异步调用",
 			},
 			&cli.Int64Flag{
-				Name: "timeout",
+				Name:  "timeout",
+				Usage: "调用的超时设置",
 			},
 			&cli.Int64Flag{
-				Name: "intervalSecond",
+				Name:  "intervalSecond",
+				Usage: "每次调用的时间间隔",
 			},
 			&cli.BoolFlag{
-				Name: "retry",
+				Name:  "retry",
+				Usage: "单次调用失败后是否继续调用",
 			},
 			&cli.StringFlag{
-				Name: "deadline",
+				Name:  "deadline",
+				Usage: "显式设置的调用截止时间",
 			},
 			&cli.BoolFlag{
-				Name: "cancelInHalfTime",
+				Name:  "cancelInHalfTime",
+				Usage: "是否在调用一半后就取消调用",
 			},
 		},
 		Action: run,
@@ -50,6 +56,7 @@ func main() {
 	if err != nil {
 		logrus.Errorf("run error :%+v\n", err)
 	}
+	time.Sleep(1 * time.Hour)
 }
 
 type RPCClient struct {
@@ -63,7 +70,7 @@ func run(c *cli.Context) error {
 	logrus.SetFormatter(&logrus.TextFormatter{DisableColors: true})
 
 	ctxDial, cancelDial := context.WithTimeout(context.Background(), time.Second*2)
-	conn, err := grpc.DialContext(ctxDial, c.String("url"), grpc.WithInsecure())
+	conn, err := grpc.DialContext(ctxDial, c.String("url"), grpc.WithInsecure(), grpc.WithBackoffMaxDelay(10*time.Second))
 	cancelDial()
 
 	if err != nil {
@@ -126,21 +133,21 @@ func callRPC(client *RPCClient, i int, timeout time.Duration, deadline time.Time
 		cancleCaller()
 	}
 
-	logrus.Infof("RPC返回 %+v -- %+v\n", rsp, err)
+	//logrus.Infof("RPC返回 %+v -- %+v\n", rsp, err)
 
 	if rsp == nil {
-		logrus.Infof("rsp is nil \n")
+		logrus.Infof("返回结果为空 \n")
 	} else {
-		logrus.Infof("rsp is %+v\n", *rsp)
+		logrus.Infof("返回结果为 %+v\n", *rsp)
 	}
 
 	if err != nil {
-		logrus.Infof("call error %+v\n", err)
+		/*logrus.Infof("调用错误 %+v\n", err)
 		gRpcErr, ok := status.FromError(err)
 		if ok {
-			logrus.Infof("gRpcErr code:%+v err:%+v detail:%+v conn state:%+v target:%+v\n",
+			logrus.Infof("调用的gRPC错误 code:%+v err:%+v detail:%+v conn state:%+v target:%+v\n",
 				gRpcErr.Code(), gRpcErr.Err(), gRpcErr.Details(), client.GetState(), client.Target())
-		}
+		}*/
 	}
 
 	return err
@@ -154,14 +161,14 @@ func syncCall(client *RPCClient, count int, timeout time.Duration, deadline time
 			//间隔多少秒后继续
 			time.Sleep(time.Duration(intervalSecond) * time.Second)
 
-			if err != nil {
+			/*if err != nil {
 				logrus.Infof("再次查看状态 %+v\n", err)
 				gRpcErr, ok := status.FromError(err)
 				if ok {
-					logrus.Infof("gRpcErr code:%+v err:%+v detail:%+v conn state:%+v target:%+v\n",
+					logrus.Infof("再次查看状态时的gRPC错误 code:%+v err:%+v detail:%+v conn state:%+v target:%+v\n",
 						gRpcErr.Code(), gRpcErr.Err(), gRpcErr.Details(), client.GetState(), client.Target())
 				}
-			}
+			}*/
 		} else if !retry {
 			if err != nil {
 				return err

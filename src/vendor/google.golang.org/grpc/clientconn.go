@@ -22,6 +22,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"math"
 	"net"
 	"reflect"
@@ -698,7 +699,7 @@ func (ac *addrConn) connect() error {
 	ac.mu.Unlock()
 
 	// Start a goroutine connecting to the server asynchronously.
-	fmt.Println("调用resetTransport的go routine:", string(debug.Stack()))
+	logrus.Info("调用resetTransport的go routine:", string(debug.Stack()))
 	go ac.resetTransport()
 	return nil
 }

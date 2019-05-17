@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
 	"pineal-niwan/grpc_dig/go_routine_id"
 	"pineal-niwan/grpc_dig/hello/pb"
 	"reflect"
@@ -27,6 +28,12 @@ type HelloService struct {
 	SleepSecond int
 	//额外指定的sleep秒数
 	ExtraSleepSecond int
+	//服务时是否制造panic
+	NeedPanic bool
+	//服务时是否关闭Service
+	NeedClose bool
+
+	Svr *grpc.Server
 }
 
 type ErrSelf struct {
@@ -103,5 +110,15 @@ func (h *HelloService) SayHello(ctx context.Context, req *pb.HelloRequest) (*pb.
 		err = &ErrSelf{Code: h.ForceErrCode}
 	}
 	logrus.Infof("normal返回 %+v, -- %+v", rsp, err)
+
+	if h.NeedPanic {
+		panic("panic测试")
+	}
+
+	if h.NeedClose {
+		go h.Svr.GracefulStop()
+		//h.Svr.GracefulStop()
+	}
+
 	return rsp, err
 }

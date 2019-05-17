@@ -17,31 +17,47 @@ func main() {
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "port",
-				Usage: "listen port",
+				Usage: "服务端口",
 			},
 			&cli.BoolFlag{
-				Name: "showGoId",
+				Name:  "showGoId",
+				Usage: "显示go routine id",
 			},
 			&cli.BoolFlag{
-				Name: "showCtx",
+				Name:  "showCtx",
+				Usage: "显示context类型",
 			},
 			&cli.BoolFlag{
-				Name: "showDeadline",
+				Name:  "showDeadline",
+				Usage: "显示超时相关信息",
 			},
 			&cli.BoolFlag{
-				Name: "showCtxErr",
+				Name:  "showCtxErr",
+				Usage: "显示context错误",
 			},
 			&cli.IntFlag{
-				Name: "forceErrCode",
+				Name:  "forceErrCode",
+				Usage: "强制返回错误",
 			},
 			&cli.BoolFlag{
-				Name: "forceReturnNil",
+				Name:  "forceReturnNil",
+				Usage: "强制返回空值",
 			},
 			&cli.IntFlag{
-				Name: "sleepSecond",
+				Name:  "sleepSecond",
+				Usage: "服务停顿秒数,每秒会检查context",
 			},
 			&cli.IntFlag{
-				Name: "extraSleepSecond",
+				Name:  "extraSleepSecond",
+				Usage: "另一个服务停顿秒数，但不会每秒检查context，在事后检查context",
+			},
+			&cli.BoolFlag{
+				Name:  "needPanic",
+				Usage: "服务时制造panic",
+			},
+			&cli.BoolFlag{
+				Name:  "needClose",
+				Usage: "服务时关闭Service",
 			},
 		},
 		Action: run,
@@ -69,7 +85,12 @@ func run(c *cli.Context) error {
 		ForceReturnNil:   c.Bool("forceReturnNil"),
 		SleepSecond:      c.Int("sleepSecond"),
 		ExtraSleepSecond: c.Int("extraSleepSecond"),
+		NeedPanic:        c.Bool("needPanic"),
+		NeedClose:        c.Bool("needClose"),
+
+		Svr: rpcSvr,
 	})
 	err = rpcSvr.Serve(ln)
+	logrus.Infof("服务器退出时的错误:%+v", err)
 	return err
 }
